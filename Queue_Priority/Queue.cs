@@ -1,29 +1,56 @@
 ﻿using System;
-namespace Queue_List
+
+namespace Queue_Priority
 {
     /// <summary>
-    /// A First In First Out collection
+    /// A collection that returns the highest priority item first and lowest priority item last.
     /// </summary>
     /// <typeparam name="T">The type of data stored in the collection</typeparam>
-    public class Queue<T> : System.Collections.Generic.IEnumerable<T>
+    public class PriorityQueue<T> : System.Collections.Generic.IEnumerable<T>
+        where T : IComparable<T>
     {
-        // the queued items - the Last list item is the
-        // newest queue item, the First is the oldest.
-        // This is so LinkedList<T>.GetEnumerator "just works" 
         System.Collections.Generic.LinkedList<T> _items =
             new System.Collections.Generic.LinkedList<T>();
 
         /// <summary>
-        /// Adds an item to the back of the queue
+        /// Adds an item to the queue in priority order
         /// </summary>
         /// <param name="item">The item to place in the queue</param>
         public void Enqueue(T item)
         {
-            _items.AddLast(item);
+            // if the list is empty, just add the item
+            if (_items.Count == 0)
+            {
+                _items.AddLast(item);
+            }
+            else
+            {
+                // find the proper insert point
+                var current = _items.First;
+
+                // while we're not at the end of the list and the current value
+                // is larger than the value being inserted...
+                while (current != null && current.Value.CompareTo(item) > 0)
+                {
+                    current = current.Next;
+                }
+
+                if (current == null)
+                {
+                    // we made it to the end of the list
+                    _items.AddLast(item);
+                }
+                else
+                {
+                    // the current item is <= the one being added
+                    // so add the item before it.
+                    _items.AddBefore(current, item);
+                }
+            }
         }
 
         /// <summary>
-        /// Removes and returns the front item from the queue
+        /// Removes and returns the highest priority item from the queue
         /// </summary>
         /// <returns>The front item from the queue</returns>
         public T Dequeue()
@@ -44,7 +71,7 @@ namespace Queue_List
         }
 
         /// <summary>
-        /// Returns the front item from the queue without removing it from the queue
+        /// Returns the highest priority item from the queue without removing it from the queue
         /// </summary>
         /// <returns>The front item from the queue</returns>
         public T Peek()
@@ -54,7 +81,6 @@ namespace Queue_List
                 throw new InvalidOperationException("The queue is empty.");
             }
 
-            // return the last value in the queue
             return _items.First.Value;
         }
 
@@ -96,4 +122,3 @@ namespace Queue_List
         }
     }
 }
-
